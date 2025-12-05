@@ -37,6 +37,7 @@ import ModuleViewerPage from './migrant/ModuleViewerPage';
 import JobsPage from './migrant/JobsPage';
 import JobDetailPage from './migrant/JobDetailPage';
 import ProfilePage from './migrant/ProfilePage';
+import SessionsPage from './migrant/SessionsPage';
 
 function MigrantHome() {
   const { t } = useLanguage();
@@ -432,6 +433,7 @@ export default function MigrantDashboard() {
         <div className="cpc-container">
           <Routes>
             <Route index element={<MigrantHome />} />
+            <Route path="sessoes" element={<SessionsPage />} />
             <Route path="trilhas" element={<TrailsPage />} />
             <Route path="trilhas/:trailId" element={<TrailDetailPage />} />
             <Route path="trilhas/:trailId/modulo/:moduleId" element={<ModuleViewerPage />} />
