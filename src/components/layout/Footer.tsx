@@ -43,11 +43,6 @@ export function Footer() {
                   {t.footer.training}
                 </Link>
               </li>
-              <li>
-                <Link to="/precos" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  {t.footer.pricing}
-                </Link>
-              </li>
             </ul>
           </div>
 

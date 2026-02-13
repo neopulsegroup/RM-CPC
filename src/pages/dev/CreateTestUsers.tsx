@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { registerUser } from '@/integrations/firebase/auth';
+import { registerUser, loginUser, updateUserProfile } from '@/integrations/firebase/auth';
 import { setDocument } from '@/integrations/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -8,7 +8,7 @@ import { UserRole } from '@/contexts/AuthContext';
 type Result = {
   email: string;
   role: string;
-  status: 'created' | 'exists' | 'error';
+  status: 'created' | 'exists' | 'error' | 'updated';
   message?: string;
 };
 
@@ -90,6 +90,30 @@ export default function CreateTestUsersDev() {
     setResults(out);
     setRunning(false);
   }
+  
+  async function setupCPCUser() {
+    setRunning(true);
+    const email = 'cpc@cpc.com';
+    const password = 'Teste1234!';
+    
+    try {
+      // Tentar login primeiro
+      try {
+        const user = await loginUser(email, password);
+        // Se logou, atualizar role
+        await updateUserProfile(user.uid, { role: 'admin' });
+        setResults(prev => [...prev, { email, role: 'admin', status: 'updated', message: 'Perfil atualizado para Admin (logado)' }]);
+      } catch (loginError) {
+        // Se login falhou, tentar criar
+        const res = await createUser(email, password, 'CPC Admin', 'admin');
+        setResults(prev => [...prev, res]);
+      }
+    } catch (e: any) {
+        setResults(prev => [...prev, { email, role: 'admin', status: 'error', message: e.message }]);
+    } finally {
+        setRunning(false);
+    }
+  }
 
   useEffect(() => {
     run();
@@ -106,21 +130,25 @@ export default function CreateTestUsersDev() {
             Esta página só existe em desenvolvimento. Cria três contas: Migrante, Empresa e CPC (admin).
           </p>
 
-          <div className="mb-4">
+          <div className="mb-4 flex gap-2">
             <Button onClick={run} disabled={running}>
               {running ? 'A criar...' : 'Recriar usuários de teste'}
+            </Button>
+            <Button onClick={setupCPCUser} disabled={running} variant="outline">
+              Configurar cpc@cpc.com
             </Button>
           </div>
 
           <div className="space-y-2">
-            {results.map((r) => (
-              <div key={r.email} className="flex items-center justify-between rounded-md border p-3">
+            {results.map((r, i) => (
+              <div key={i} className="flex items-center justify-between rounded-md border p-3">
                 <div className="space-y-1">
                   <div className="font-mono text-sm">{r.email}</div>
                   <div className="text-xs text-muted-foreground">role: {r.role}</div>
                 </div>
                 <div className="text-sm">
                   {r.status === 'created' && <span className="text-green-600">criado</span>}
+                  {r.status === 'updated' && <span className="text-blue-600">atualizado</span>}
                   {r.status === 'exists' && <span className="text-amber-600">já existe</span>}
                   {r.status === 'error' && <span className="text-red-600">erro: {r.message}</span>}
                 </div>
@@ -134,6 +162,7 @@ export default function CreateTestUsersDev() {
               <li>migrante.teste@local.test / Teste1234!</li>
               <li>empresa.teste@local.test / Teste1234!</li>
               <li>cpc.admin@local.test / Teste1234!</li>
+              <li>cpc@cpc.com / Teste1234! (Admin)</li>
             </ul>
           </div>
         </CardContent>

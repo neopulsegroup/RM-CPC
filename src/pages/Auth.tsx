@@ -81,12 +81,21 @@ export default function Auth() {
           return;
         }
         await register({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
-          role: selectedRole,
-        });
-        toast.success(t.auth.accountCreated);
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        role: selectedRole,
+      });
+      toast.success(t.auth.accountCreated);
+      
+      // Force navigation after registration based on role
+      if (selectedRole === 'company') {
+        navigate('/dashboard/empresa');
+      } else if (selectedRole === 'migrant') {
+        navigate('/triagem');
+      } else {
+        navigate('/dashboard/cpc');
+      }
       }
     } catch (error: unknown) {
       console.error('Auth error:', error);

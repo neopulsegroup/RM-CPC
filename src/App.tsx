@@ -33,6 +33,17 @@ function LoadingScreen() {
   );
 }
 
+// Helper to get dashboard path by role
+function getDashboardPath(role: string): string {
+  if (role === 'migrant') return '/dashboard/migrante';
+  if (role === 'company') return '/dashboard/empresa';
+  // CPC roles
+  if (['admin', 'mediator', 'lawyer', 'psychologist', 'manager', 'coordinator', 'trainer'].includes(role)) {
+    return '/dashboard/cpc';
+  }
+  return '/';
+}
+
 // Protected Route Component
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
   const { isAuthenticated, profile, isLoading } = useAuth();
@@ -46,7 +57,9 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
   }
 
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
-    return <Navigate to="/" replace />;
+    // Redirect to their appropriate dashboard instead of home
+    const correctDashboard = getDashboardPath(profile.role);
+    return <Navigate to={correctDashboard} replace />;
   }
 
   return <>{children}</>;

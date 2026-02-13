@@ -24,7 +24,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isOwner(userId);
+      allow update: if isOwner(userId) || hasRole('admin');
       allow delete: if false; // Prevent accidental deletion
     }
     
