@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('*')
       .eq('user_id', userId)
       .maybeSingle();
-    
+
     if (data && !error) {
       setProfile(data as Profile);
     }
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select('id, user_id, completed')
       .eq('user_id', userId)
       .maybeSingle();
-    
+
     if (data && !error) {
       setTriage(data);
     }
@@ -83,41 +83,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, fetchProfile, fetchTriage]);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Defer Supabase calls with setTimeout
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-            fetchTriage(session.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
-          setTriage(null);
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      const timeout = 3000; // 3 seconds timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Auth timeout')), timeout)
+      );
+
+      try {
+        setIsLoading(true);
+
+        // Race getSession against a timeout to prevent infinite loading if Supabase is down
+        const { data: { session } } = await Promise.race([
+          supabase.auth.getSession(),
+          timeoutPromise
+        ]) as { data: { session: Session | null } };
+
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user) {
+            // Using Settled to prevent a single failing query from hanging the entire auth flow
+            const results = await Promise.allSettled([
+              fetchProfile(session.user.id),
+              fetchTriage(session.user.id)
+            ]);
+
+            // Log any errors for visibility
+            results.forEach(res => {
+              if (res.status === 'rejected') console.error('Auth init fetch error:', res.reason);
+            });
+          } else {
+            setProfile(null);
+            setTriage(null);
+          }
         }
-        
-        setIsLoading(false);
+      } catch (err) {
+        console.error('Auth initialization failed or timed out:', err);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user) {
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+              setIsLoading(true);
+              await Promise.allSettled([
+                fetchProfile(session.user.id),
+                fetchTriage(session.user.id)
+              ]);
+            } else {
+              if (!profile) fetchProfile(session.user.id);
+              if (!triage) fetchTriage(session.user.id);
+            }
+          } else {
+            setProfile(null);
+            setTriage(null);
+          }
+        } catch (err) {
+          console.error('Auth state change handler failed:', err);
+        } finally {
+          setIsLoading(false);
+        }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-        fetchTriage(session.user.id);
-      }
-      
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [fetchProfile, fetchTriage]);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -125,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
-    
+
     if (error) {
       throw new Error(error.message);
     }
@@ -133,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (data: RegisterData) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -145,7 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
-    
+
     if (error) {
       throw new Error(error.message);
     }
