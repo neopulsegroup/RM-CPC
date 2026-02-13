@@ -35,7 +35,8 @@ export function Header() {
     const role = (profile?.role ?? (user?.user_metadata?.role as UserRole | undefined));
     if (!role) return '/';
     if (role === 'migrant') {
-      return triage?.completed ? '/dashboard/migrante' : '/triagem';
+      // Always point to dashboard, let the TriageGuard handle redirection if needed
+      return '/dashboard/migrante';
     }
     if (role === 'company') return '/dashboard/empresa';
     return '/dashboard/cpc';

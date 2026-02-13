@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { getDocument, setDocument, updateDocument } from '@/integrations/firebase/firestore';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Check, Loader2, CheckCircle, ClipboardList } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
@@ -447,13 +447,20 @@ export default function Triage() {
   };
 
   async function saveTriage() {
-    if (!user) return;
+    if (!user) {
+      toast.error('Você precisa estar logado para salvar a triagem.');
+      navigate('/entrar');
+      return;
+    }
     setSaving(true);
     try {
+      console.log('[Triage] Starting save process...');
+
       const baseData: any = {
-        user_id: user.id,
+        userId: user.uid,
         completed: true,
-        completed_at: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        answers: answers
       };
 
       // Map answers to database columns where possible
@@ -471,44 +478,36 @@ export default function Triage() {
         }
       }
       baseData.interests = answers.professional_interests || [];
-      baseData.education_level = answers.education_level || null;
 
+      console.log('[Triage] Checking for existing triage record...');
+      const existing = await getDocument('triage', user.uid);
 
-      // Check existing
-      const { data: existing } = await supabase.from('triage').select('id').eq('user_id', user.id).maybeSingle();
-
-      let error;
       if (existing) {
-        const { error: updateError } = await supabase.from('triage').update({ ...baseData, answers: answers }).eq('user_id', user.id);
-        error = updateError;
+        console.log('[Triage] Updating existing record...');
+        await updateDocument('triage', user.uid, baseData);
       } else {
-        const { error: insertError } = await supabase.from('triage').insert({ ...baseData, answers: answers });
-        error = insertError;
+        console.log('[Triage] Inserting new record...');
+        await setDocument('triage', user.uid, baseData);
       }
 
-      if (error) {
-        console.warn('Erro ao guardar triage com answers, tentando sem a coluna:', error);
-        // If 'answers' column causes an error (e.g., schema mismatch or type issue), try saving without it.
-        // This assumes 'answers' is a JSONB column and might be problematic if not configured correctly or if the payload is too large.
-        if (existing) {
-          const { error: updateError2 } = await supabase.from('triage').update(baseData).eq('user_id', user.id);
-          if (updateError2) throw updateError2;
-        } else {
-          const { error: insertError2 } = await supabase.from('triage').insert(baseData);
-          if (insertError2) throw insertError2;
-        }
-      }
+      console.log('[Triage] Saved successfully');
 
+      console.log('[Triage] Refreshing profile...');
       await refreshProfile();
+      console.log('[Triage] Profile refreshed successfully');
+
       toast.success(t.triage.success);
+      console.log('[Triage] Navigating to dashboard...');
       navigate('/dashboard/migrante');
     } catch (err: any) {
-      console.error('Final triage save error:', err);
-      toast.error(t.triage.error);
+      console.error('[Triage] Final triage save error:', err);
+      toast.error('Erro ao salvar triagem. Tente novamente.');
     } finally {
       setSaving(false);
+      console.log('[Triage] Save process completed');
     }
   };
+
 
   if (!currentStep) return <div className="p-8 text-center"><Loader2 className="animate-spin h-8 w-8 mx-auto" /></div>;
 

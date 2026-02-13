@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { registerUser } from '@/integrations/firebase/auth';
+import { setDocument } from '@/integrations/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { UserRole } from '@/contexts/AuthContext';
 
 type Result = {
   email: string;
@@ -16,43 +18,34 @@ async function createUser(
   name: string,
   role: 'migrant' | 'company' | 'admin'
 ): Promise<Result> {
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { name, role },
-    },
-  });
+  try {
+    // Register user in Firebase Auth and create profile in Firestore
+    const { user } = await registerUser(email, password, name, role as UserRole);
 
-  if (signUpError) {
-    if (signUpError.message.toLowerCase().includes('registered')) {
+    // If role is company, create company profile in Firestore
+    if (role === 'company') {
+      await setDocument('companies', user.uid, {
+        user_id: user.uid,
+        company_name: name,
+        verified: false,
+        createdAt: new Date().toISOString(),
+      });
+    } else if (role === 'migrant') {
+      // Create completed triage for test migrant user so they can access dashboard immediately
+      await setDocument('triage', user.uid, {
+        userId: user.uid,
+        completed: true,
+        answers: {}, // Empty answers but marked as completed for testing
+        createdAt: new Date().toISOString(),
+      });
+    }
+    return { email, role, status: 'created' };
+  } catch (error: any) {
+    if (error.code === 'auth/email-already-in-use') {
       return { email, role, status: 'exists', message: 'Já existe' };
     }
-    return { email, role, status: 'error', message: signUpError.message };
+    return { email, role, status: 'error', message: error.message || 'Erro desconhecido' };
   }
-
-  // Try to sign in to perform post-signup actions (e.g., company profile)
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (!signInError && signInData.user && role === 'company') {
-    const userId = signInData.user.id;
-    await supabase
-      .from('companies')
-      .upsert(
-        {
-          user_id: userId,
-          company_name: name,
-          verified: false,
-        },
-        { onConflict: 'user_id' }
-      );
-  }
-
-  await supabase.auth.signOut();
-  return { email, role, status: 'created' };
 }
 
 export default function CreateTestUsersDev() {

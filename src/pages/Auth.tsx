@@ -40,6 +40,8 @@ export default function Auth() {
       // Determine where to redirect based on role and triage status
       if (profile.role === 'migrant') {
         const triageCompleted = triage?.completed ?? false;
+        // Se a triagem não estiver completa, redireciona para a triagem.
+        // Se estiver completa, vai para o dashboard.
         navigate(triageCompleted ? '/dashboard/migrante' : '/triagem');
       } else if (profile.role === 'company') {
         navigate('/dashboard/empresa');
