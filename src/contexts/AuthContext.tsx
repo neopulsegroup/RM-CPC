@@ -48,6 +48,7 @@ interface RegisterData {
   password: string;
   name: string;
   role: UserRole;
+  nif?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -141,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (data: RegisterData) => {
     try {
-      await registerUser(data.email, data.password, data.name, data.role);
+      await registerUser(data.email, data.password, data.name, data.role, { nif: data.nif });
       // onAuthStateChanged will handle the rest
     } catch (error: any) {
       console.error('Registration error:', error);

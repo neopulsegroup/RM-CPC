@@ -156,6 +156,8 @@ export const translations = {
       fullName: 'Nome Completo',
       placeholderCompany: 'A sua empresa',
       placeholderName: 'O seu nome',
+      nif: 'NIF',
+      placeholderNif: 'Número de Identificação Fiscal',
       roles: {
         migrant: 'Pessoa Migrante',
         migrantDesc: 'Pessoa em busca de integração',
@@ -494,6 +496,8 @@ export const translations = {
       fullName: 'Full Name',
       placeholderCompany: 'Your company',
       placeholderName: 'Your name',
+      nif: 'Tax ID (NIF)',
+      placeholderNif: 'Tax Identification Number',
       roles: {
         migrant: 'Migrant',
         migrantDesc: 'Person seeking integration',
@@ -514,6 +518,8 @@ export const translations = {
       step_count: 'Step {current} of {total}',
       select_placeholder: 'Select an option',
       steps: {
+        personal_data: 'Personal Data',
+        contacts: 'Contacts',
         location: 'Location',
         pre_arrival_general: 'General Information',
         pre_arrival_legal: 'Legal Situation',
@@ -526,6 +532,13 @@ export const translations = {
         professional_profile: 'Socio-professional Profile',
       },
       questions: {
+        birth_date: 'Date of Birth',
+        gender: 'Gender',
+        nationality: 'Nationality',
+        origin_country: 'Country of Origin',
+        languages: 'Languages Spoken',
+        phone: 'Phone/WhatsApp',
+        contact_preference: 'Contact Preference',
         is_in_portugal: 'Are you already in Portugal?',
         current_country: 'Which country are you currently in?',
         arrival_date: 'Do you plan to come to Portugal in the next:',
@@ -568,6 +581,23 @@ export const translations = {
         professional_experience: 'Briefly describe your experience...',
       },
       options: {
+        gender: {
+          male: 'Male',
+          female: 'Female',
+          other_prefer_not_say: 'Other / Prefer not to say',
+        },
+        contact_preference: {
+          email: 'Email',
+          phone: 'Phone',
+          whatsapp: 'WhatsApp',
+        },
+        languages: {
+          portuguese: 'Portuguese',
+          english: 'English',
+          french: 'French',
+          spanish: 'Spanish',
+          other: 'Other',
+        },
         is_in_portugal: { yes: 'Yes', no: 'No' },
         arrival_date: { '3_months': '3 months', '6_months': '6 months', '12_months': '1 year', 'no_date': 'No date yet' },
         visa_started: { yes: 'Yes', no: 'No', dont_know_how: "I don't know how to start" },
@@ -797,6 +827,8 @@ export const translations = {
       fullName: 'Nombre Completo',
       placeholderCompany: 'Su empresa',
       placeholderName: 'Su nombre',
+      nif: 'NIF',
+      placeholderNif: 'Número de Identificação Fiscal',
       roles: {
         migrant: 'Persona Migrante',
         migrantDesc: 'Persona en busca de integración',
@@ -817,6 +849,8 @@ export const translations = {
       step_count: 'Paso {current} de {total}',
       select_placeholder: 'Seleccione una opción',
       steps: {
+        personal_data: 'Datos Personales',
+        contacts: 'Contactos',
         location: 'Ubicación',
         pre_arrival_general: 'Información General',
         pre_arrival_legal: 'Situación Legal',
@@ -829,6 +863,13 @@ export const translations = {
         professional_profile: 'Perfil Socioprofesional',
       },
       questions: {
+        birth_date: 'Fecha de nacimiento',
+        gender: 'Género',
+        nationality: 'Nacionalidad',
+        origin_country: 'País de origen',
+        languages: 'Idiomas que habla',
+        phone: 'Teléfono/WhatsApp',
+        contact_preference: 'Preferencia de contacto',
         is_in_portugal: '¿Ya se encontra en Portugal?',
         current_country: '¿En qué país se encuentra actualmente?',
         arrival_date: 'Pretende venir a Portugal en los próximos:',
@@ -871,6 +912,23 @@ export const translations = {
         professional_experience: 'Describa brevemente su experiencia...',
       },
       options: {
+        gender: {
+          male: 'Masculino',
+          female: 'Femenino',
+          other_prefer_not_say: 'Otro / Prefiero no decir',
+        },
+        contact_preference: {
+          email: 'Correo electrónico',
+          phone: 'Teléfono',
+          whatsapp: 'WhatsApp',
+        },
+        languages: {
+          portuguese: 'Portugués',
+          english: 'Inglés',
+          french: 'Francés',
+          spanish: 'Español',
+          other: 'Otro',
+        },
         is_in_portugal: { yes: 'Sí', no: 'No' },
         arrival_date: { '3_months': '3 meses', '6_months': '6 meses', '12_months': '1 año', 'no_date': 'Aún sin fecha' },
         visa_started: { yes: 'Sí', no: 'No', dont_know_how: 'No sé cómo empezar' },

@@ -29,6 +29,7 @@ export default function Auth() {
     email: '',
     password: '',
     confirmPassword: '',
+    nif: '',
   });
 
   const { t } = useLanguage();
@@ -81,11 +82,12 @@ export default function Auth() {
           return;
         }
         await register({
-        email: formData.email,
-        password: formData.password,
-        name: formData.name,
-        role: selectedRole,
-      });
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          role: selectedRole,
+          nif: selectedRole === 'company' ? formData.nif : undefined,
+        });
       toast.success(t.auth.accountCreated);
       
       // Force navigation after registration based on role
@@ -208,6 +210,21 @@ export default function Auth() {
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                     placeholder={selectedRole === 'company' ? t.auth.placeholderCompany : t.auth.placeholderName}
+                  />
+                </div>
+              )}
+
+              {mode === 'register' && selectedRole === 'company' && (
+                <div className="space-y-2">
+                  <Label htmlFor="nif">{t.auth.nif || 'NIF'}</Label>
+                  <Input
+                    id="nif"
+                    value={formData.nif}
+                    onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
+                    required
+                    placeholder={t.auth.placeholderNif || '123456789'}
+                    minLength={9}
+                    maxLength={9}
                   />
                 </div>
               )}

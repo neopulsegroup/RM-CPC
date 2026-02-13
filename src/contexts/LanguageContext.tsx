@@ -23,6 +23,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const get = useCallback((path: string): string => {
     const keys = path.split('.');
     let current: any = translations[language];
+
+    // Debug log for specific failing keys
+    if (path.includes('triage.steps.personal_data') || path.includes('triage.questions.birth_date')) {
+      // console.log(`[LanguageContext] Getting path: ${path}, language: ${language}`);
+    }
+
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
         current = current[key];

@@ -13,6 +13,7 @@ export interface UserProfile {
     email: string;
     name: string;
     role: 'migrant' | 'company' | 'admin' | 'mediator' | 'lawyer' | 'psychologist' | 'manager' | 'coordinator' | 'trainer';
+    nif?: string;
     createdAt: any;
     updatedAt: any;
 }
@@ -24,7 +25,8 @@ export async function registerUser(
     email: string,
     password: string,
     name: string,
-    role: 'migrant' | 'company' | 'admin' | 'mediator' | 'lawyer' | 'psychologist' | 'manager' | 'coordinator' | 'trainer' = 'migrant'
+    role: 'migrant' | 'company' | 'admin' | 'mediator' | 'lawyer' | 'psychologist' | 'manager' | 'coordinator' | 'trainer' = 'migrant',
+    additionalData?: { nif?: string }
 ) {
     try {
         // Create user in Firebase Auth
@@ -41,6 +43,7 @@ export async function registerUser(
             role,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
+            ...(additionalData?.nif && { nif: additionalData.nif }),
         };
 
         await setDoc(doc(db, 'users', user.uid), userProfile);
