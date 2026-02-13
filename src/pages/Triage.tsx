@@ -13,11 +13,12 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { PhoneInput } from '@/components/ui/phone-input';
 
 
 // --- Types ---
 
-type TriageQuestionType = 'radio' | 'select' | 'multiselect' | 'text' | 'textarea';
+type TriageQuestionType = 'radio' | 'select' | 'multiselect' | 'text' | 'textarea' | 'date' | 'phone';
 
 interface TriageQuestion {
   id: string;
@@ -38,9 +39,76 @@ interface TriageStep {
   questions: TriageQuestion[];
 }
 
+// --- Countries List (Simplified) ---
+const COUNTRIES = [
+  'Portugal', 'Brasil', 'Angola', 'Moçambique', 'Cabo Verde', 
+  'Guiné-Bissau', 'São Tomé e Príncipe', 'Timor-Leste', 
+  'Ucrânia', 'Índia', 'Bangladesh', 'Nepal', 'Paquistão', 
+  'Venezuela', 'Colômbia', 'Outro'
+];
+
 // --- Steps Configuration ---
 
 const ALL_STEPS: TriageStep[] = [
+  {
+    id: 'personal_data',
+    titleKey: 'triage.steps.personal_data',
+    questions: [
+      {
+        id: 'birth_date',
+        labelKey: 'triage.questions.birth_date',
+        type: 'date',
+        required: true
+      },
+      {
+        id: 'gender',
+        labelKey: 'triage.questions.gender',
+        type: 'radio',
+        options: ['male', 'female', 'other_prefer_not_say'],
+        required: true
+      },
+      {
+        id: 'nationality',
+        labelKey: 'triage.questions.nationality',
+        type: 'select',
+        options: COUNTRIES,
+        required: true
+      },
+      {
+        id: 'origin_country',
+        labelKey: 'triage.questions.origin_country',
+        type: 'select',
+        options: COUNTRIES,
+        required: true
+      },
+      {
+        id: 'languages',
+        labelKey: 'triage.questions.languages',
+        type: 'multiselect',
+        options: ['portuguese', 'english', 'french', 'spanish', 'other'],
+        required: true
+      },
+    ],
+  },
+  {
+    id: 'contacts',
+    titleKey: 'triage.steps.contacts',
+    questions: [
+      {
+        id: 'phone',
+        labelKey: 'triage.questions.phone',
+        type: 'phone',
+        required: true
+      },
+      {
+        id: 'contact_preference',
+        labelKey: 'triage.questions.contact_preference',
+        type: 'radio',
+        options: ['email', 'phone', 'whatsapp'],
+        required: true
+      },
+    ],
+  },
   {
     id: 'location',
     titleKey: 'triage.steps.location',
@@ -543,6 +611,22 @@ export default function Triage() {
                     />
                   )}
 
+                  {question.type === 'phone' && (
+                    <PhoneInput
+                      placeholder={question.placeholderKey ? t.get(question.placeholderKey) : '912 345 678'}
+                      value={answers[question.id] || ''}
+                      onChange={(val) => updateAnswer(question.id, val)}
+                    />
+                  )}
+
+                  {question.type === 'date' && (
+                    <Input
+                      type="date"
+                      value={answers[question.id] || ''}
+                      onChange={(e) => updateAnswer(question.id, e.target.value)}
+                    />
+                  )}
+
                   {question.type === 'textarea' && (
                     <Textarea
                       placeholder={question.placeholderKey ? t.get(question.placeholderKey) : ''}
@@ -579,7 +663,11 @@ export default function Triage() {
                       </SelectTrigger>
                       <SelectContent>
                         {question.options.map(opt => (
-                          <SelectItem key={opt} value={opt}>{t.get(`triage.options.${question.id}.${opt}`)}</SelectItem>
+                          <SelectItem key={opt} value={opt}>
+                            {(question.id === 'nationality' || question.id === 'origin_country')
+                              ? opt
+                              : t.get(`triage.options.${question.id}.${opt}`)}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
