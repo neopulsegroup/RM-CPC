@@ -26,9 +26,9 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: Mail, label: t.contact.info.email, value: 'info@cpc-portugal.org' },
-    { icon: Phone, label: t.contact.info.phone, value: '+351 210 000 000' },
-    { icon: MapPin, label: t.contact.info.address, value: 'Rua Principal 123, Lisboa' },
+    { icon: Mail, label: t.contact.info.email, value: 'geral@cibea.eu' },
+    { icon: Phone, label: t.contact.info.phone, value: '+351 225 088 015' },
+    { icon: MapPin, label: t.contact.info.address, value: 'Algarve (Portugal)' },
     { icon: Clock, label: t.contact.info.hours, value: 'Seg-Sex: 9h-18h' },
   ];
 
@@ -113,8 +113,17 @@ export default function Contact() {
               </div>
 
               {/* Map placeholder */}
-              <div className="cpc-card h-48 flex items-center justify-center bg-muted/50">
-                <p className="text-muted-foreground">Mapa</p>
+              <div className="cpc-card h-64 overflow-hidden">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d407307.7290886638!2d-8.799797307525287!3d37.16147690227546!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd0554f676239169%3A0x446e05d045d625e1!2sAlgarve!5e0!3m2!1spt-PT!2spt!4v1710332800000!5m2!1spt-PT!2spt"
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Mapa do Algarve"
+                />
               </div>
             </div>
           </div>

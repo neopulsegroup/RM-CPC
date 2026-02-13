@@ -79,15 +79,15 @@ export function Footer() {
             <ul className="space-y-4 mb-6">
               <li className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>info@portal-cpc.com</span>
+                <span>geral@cibea.eu</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+351 21 000 0000</span>
+                <span>+351 225 088 015</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span>Lisboa, Portugal</span>
+                <span>Algarve (Portugal)</span>
               </li>
             </ul>
 
