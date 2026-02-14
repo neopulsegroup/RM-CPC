@@ -6,7 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { getDocument, setDocument, updateDocument } from '@/integrations/firebase/firestore';
 import { toast } from 'sonner';
-import { ArrowLeft, ArrowRight, Check, Loader2, CheckCircle, ClipboardList } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Loader2, CheckCircle, ClipboardList, MapPin, Plane } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -636,7 +636,42 @@ export default function Triage() {
                     />
                   )}
 
-                  {question.type === 'radio' && question.options && (
+                  {question.type === 'radio' && question.id === 'is_in_portugal' && question.options && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {question.options.map(opt => {
+                        const isSelected = answers[question.id] === opt;
+                        return (
+                          <div 
+                            key={opt}
+                            className={`
+                              relative flex flex-col items-start p-6 rounded-xl border-2 cursor-pointer transition-all
+                              ${isSelected 
+                                ? 'border-primary bg-primary/5' 
+                                : 'border-muted hover:border-primary/50 bg-card'}
+                            `}
+                            onClick={() => updateAnswer(question.id, opt)}
+                          >
+                            <div className={`
+                              p-3 rounded-lg mb-4
+                              ${isSelected ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}
+                            `}>
+                              {opt === 'yes' ? <MapPin className="h-6 w-6" /> : <Plane className="h-6 w-6" />}
+                            </div>
+                            
+                            <h3 className="font-semibold text-lg mb-1">
+                              {t.get(`triage.options.is_in_portugal.${opt}`)}
+                            </h3>
+                            
+                            <p className="text-sm text-muted-foreground">
+                              {t.get(`triage.options.is_in_portugal_desc.${opt}`)}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {question.type === 'radio' && question.id !== 'is_in_portugal' && question.options && (
                     <RadioGroup
                       value={answers[question.id]}
                       onValueChange={(val) => updateAnswer(question.id, val)}
